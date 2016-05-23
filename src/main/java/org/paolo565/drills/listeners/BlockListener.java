@@ -54,7 +54,7 @@ public class BlockListener implements Listener {
 
         if(broken.getType() == Material.DIAMOND_BLOCK || broken.getType() == Material.IRON_BLOCK) {
             Block furnace = BlockUtils.getFurnaceNearDriller(broken.getLocation());
-            if(furnace != null) {
+            if(furnace != null && plugin.getDrillOwner(furnace.getLocation()) != null) {
                 if(plugin.removeDrill(furnace.getLocation())) {
                     furnace.breakNaturally();
                     player.sendMessage(ChatColor.DARK_GREEN + "Drill removed successfully.");
@@ -63,7 +63,7 @@ public class BlockListener implements Listener {
                     player.sendMessage(ChatColor.RED + "Error while removing the drill.");
                 }
             }
-        } else if(broken.getType() == Material.FURNACE) {
+        } else if(broken.getType() == Material.FURNACE && plugin.getDrillOwner(broken.getLocation()) != null) {
             Block driller = BlockUtils.getDrillerNearFurnace(broken.getLocation());
             if(driller != null) {
                 if(plugin.removeDrill(broken.getLocation())) {
