@@ -1,0 +1,11 @@
+# The blocks that the drill can't break
+# Block list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+disabled_blocks:
+- BEDROCK
+- PORTAL
+- ENDER_PORTAL
+- ENDER_PORTAL_FRAME
+- END_CRYSTAL
+
+# The maximum distance between the drill and the block to break
+max_distance: 128
