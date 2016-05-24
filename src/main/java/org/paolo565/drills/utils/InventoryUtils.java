@@ -10,7 +10,7 @@ public class InventoryUtils {
 
         for(int i = 0; i < inventory.getSize(); i++) {
             ItemStack stack = inventory.getItem(i);
-            if(stack.getType() == material) {
+            if(stack != null && stack.getType() == material) {
                 count += stack.getAmount();
             }
         }
@@ -21,7 +21,7 @@ public class InventoryUtils {
     public static void removeItemsFromInventory(Inventory inventory, Material material, int amount) {
         for(int i = 0; i < inventory.getSize() && amount > 0; i++) {
             ItemStack stack = inventory.getItem(i);
-            if(stack.getType() == material) {
+            if(stack != null && stack.getType() == material) {
                 int remove = stack.getAmount() > amount ? amount : stack.getAmount();
                 amount -= remove;
                 if(stack.getAmount() == remove) {
