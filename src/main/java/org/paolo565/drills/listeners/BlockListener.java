@@ -112,6 +112,7 @@ public class BlockListener implements Listener {
                         int y_m = face == BlockFace.UP ? 1 : (face == BlockFace.DOWN ? -1 : 0);
                         int z_m = face == BlockFace.SOUTH ? 1 : (face == BlockFace.NORTH ? -1 : 0);
 
+                        boolean destroy = false;
                         Block toBreak = null;
                         Location drillerLocation = driller.getLocation();
                         World world = driller.getWorld();
@@ -125,11 +126,12 @@ public class BlockListener implements Listener {
                                     return;
                                 }
 
+                                destroy = true;
                                 break;
                             }
                         }
 
-                        if (toBreak != null) {
+                        if (destroy) {
                             BlockBreakEvent event = new BlockBreakEvent(toBreak, owner);
                             plugin.getServer().getPluginManager().callEvent(event);
                             if (!event.isCancelled()) {
