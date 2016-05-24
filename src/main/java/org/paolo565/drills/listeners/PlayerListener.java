@@ -23,7 +23,7 @@ public class PlayerListener implements Listener {
         ItemStack clickedStack = event.getCurrentItem();
         Inventory clickedInventory = event.getClickedInventory();
         InventoryAction action = event.getAction();
-        if(openInventory.getType() == InventoryType.FURNACE && clickedInventory.getType() != InventoryType.FURNACE
+        if(openInventory.getType() == InventoryType.FURNACE && clickedInventory != null && clickedInventory.getType() != InventoryType.FURNACE
                 && action == InventoryAction.MOVE_TO_OTHER_INVENTORY && clickedStack.getType() == Material.SUGAR_CANE) {
             ItemStack furnaceSlot = openInventory.getItem(1);
             int count;
