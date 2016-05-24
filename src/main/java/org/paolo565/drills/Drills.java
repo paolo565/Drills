@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.paolo565.drills.listeners.BlockListener;
+import org.paolo565.drills.listeners.PlayerListener;
 
 import java.io.File;
 import java.sql.ResultSet;
@@ -33,6 +34,7 @@ public class Drills extends JavaPlugin {
         PluginManager pluginManager = server.getPluginManager();
 
         pluginManager.registerEvents(new BlockListener(this), this);
+        pluginManager.registerEvents(new PlayerListener(), this);
     }
 
     public void onDisable() {
