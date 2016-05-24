@@ -16,6 +16,7 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.inventory.ItemStack;
 import org.paolo565.drills.Drills;
 import org.paolo565.drills.utils.BlockUtils;
+import org.paolo565.drills.utils.InventoryUtils;
 
 public class BlockListener implements Listener {
     private Drills plugin;
@@ -100,14 +101,10 @@ public class BlockListener implements Listener {
             Block driller = BlockUtils.getDrillerNearFurnace(furnaceBlock.getLocation());
             if(driller != null) {
                 Furnace furnace = (Furnace) furnaceBlock.getState();
-                ItemStack fuel = furnace.getInventory().getFuel();
-                ItemStack smelting = furnace.getInventory().getSmelting();
                 int usedFuel = driller.getType() == Material.IRON_BLOCK ? 2 : 1;
-                ItemStack fuelSlot = (fuel != null && fuel.getType() == Material.SUGAR_CANE && fuel.getAmount() >= usedFuel) ?
-                        fuel : (smelting != null && smelting.getType() == Material.SUGAR_CANE && smelting.getAmount() >= usedFuel) ?
-                        smelting : null;
+                int fuel = InventoryUtils.countItemsInInventory(furnace.getInventory(), Material.SUGAR_CANE);
 
-                if(fuelSlot != null) {
+                if(fuel >= usedFuel) {
                     Player owner = plugin.getDrillOwner(furnaceBlock.getLocation());
                     if (owner != null) {
                         BlockFace face = furnaceBlock.getFace(driller);
@@ -137,11 +134,7 @@ public class BlockListener implements Listener {
                             plugin.getServer().getPluginManager().callEvent(event);
                             if (!event.isCancelled()) {
                                 toBreak.breakNaturally();
-                                if (usedFuel == fuelSlot.getAmount()) {
-                                    fuelSlot.setType(Material.AIR);
-                                } else {
-                                    fuelSlot.setAmount(fuelSlot.getAmount() - usedFuel);
-                                }
+                                InventoryUtils.removeItemsFromInventory(furnace.getInventory(), Material.SUGAR_CANE, usedFuel);
                             }
                         }
                     }
