@@ -1,9 +1,6 @@
 package org.paolo565.drills.listeners;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
@@ -57,7 +54,17 @@ public class BlockListener implements Listener {
             Block furnace = BlockUtils.getFurnaceNearDriller(broken.getLocation());
             if(furnace != null && plugin.getDrillOwner(furnace.getLocation()) != null) {
                 if(plugin.removeDrill(furnace.getLocation())) {
-                    furnace.breakNaturally();
+                    if(player.getGameMode() == GameMode.CREATIVE) {
+                        for(ItemStack drop : furnace.getDrops()) {
+                            if(drop.getType() != Material.FURNACE) {
+                                furnace.getLocation().getWorld().dropItemNaturally(furnace.getLocation(), drop);
+                            }
+                        }
+
+                        furnace.setType(Material.AIR);
+                    } else {
+                        furnace.breakNaturally();
+                    }
                     player.sendMessage(ChatColor.DARK_GREEN + "Drill removed successfully.");
                 } else {
                     event.setCancelled(true);
@@ -68,7 +75,11 @@ public class BlockListener implements Listener {
             Block driller = BlockUtils.getDrillerNearFurnace(broken.getLocation());
             if(driller != null) {
                 if(plugin.removeDrill(broken.getLocation())) {
-                    driller.breakNaturally();
+                    if(player.getGameMode() == GameMode.CREATIVE) {
+                        driller.setType(Material.AIR);
+                    } else {
+                        driller.breakNaturally();
+                    }
                     player.sendMessage(ChatColor.DARK_GREEN + "Drill removed successfully.");
                 } else {
                     event.setCancelled(true);
