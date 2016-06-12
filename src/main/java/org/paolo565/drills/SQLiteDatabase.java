@@ -59,7 +59,7 @@ public class SQLiteDatabase {
 
     private void initializeDatabase() {
         try {
-            getConnection().createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS drills (owner VARCHAR(36) NULL, furnace_world VARCHAT(32) NULL, furnace_x INT(11) NULL, furnace_y INT(11) NULL, furnace_z INT(11) NULL)");
+            getConnection().createStatement().executeUpdate("CREATE TABLE IF NOT EXISTS drills (owner VARCHAR(36) NULL, furnace_world VARCHAR(32) NULL, furnace_x INT(11) NULL, furnace_y INT(11) NULL, furnace_z INT(11) NULL)");
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
