@@ -179,11 +179,13 @@ public class BlockListener implements Listener {
             }
         }
 
-        if (fuel.getAmount() > consumedFuel) {
-            fuel.setAmount(fuel.getAmount() - consumedFuel);
-            furnace.getInventory().setFuel(fuel);
-        } else {
-            furnace.getInventory().setFuel(new ItemStack(Material.AIR));
+        if (drilledBlocks > 0) {
+            if (fuel.getAmount() > consumedFuel) {
+                fuel.setAmount(fuel.getAmount() - consumedFuel);
+                furnace.getInventory().setFuel(fuel);
+            } else {
+                furnace.getInventory().setFuel(new ItemStack(Material.AIR));
+            }
         }
     }
 }
