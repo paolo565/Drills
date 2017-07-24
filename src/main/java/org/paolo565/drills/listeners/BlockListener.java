@@ -10,6 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.inventory.ItemStack;
+import org.paolo565.drills.Config;
 import org.paolo565.drills.Drills;
 import org.paolo565.drills.utils.BlockUtils;
 import org.paolo565.drills.utils.InventoryUtils;
@@ -121,11 +123,19 @@ public class BlockListener implements Listener {
             return;
         }
 
-        Furnace furnace = (Furnace) furnaceBlock.getState();
-        int consumedFuel = driller.getType() == Material.IRON_BLOCK ? 2 : 1;
-        int fuel = InventoryUtils.countItemsInInventory(furnace.getInventory(), Material.SUGAR_CANE);
+        Config config = Drills.getInstance().getConfiguration();
 
-        if (fuel < consumedFuel) {
+        Furnace furnace = (Furnace) furnaceBlock.getState();
+        ItemStack fuel = furnace.getInventory().getFuel();
+        if (!config.isFuel(fuel.getType())) {
+            return;
+        }
+
+        //TODO: Make it work with destoryed > 1
+        int destroyed = config.getBrokenBlocksByFuel(fuel.getType());
+        int consumedFuel = config.getDrillBitModifier(driller.getType());
+
+        if (fuel.getAmount() < consumedFuel) {
             return;
         }
 
@@ -158,7 +168,13 @@ public class BlockListener implements Listener {
             plugin.getServer().getPluginManager().callEvent(event);
             if (!event.isCancelled()) {
                 toBreak.breakNaturally();
-                InventoryUtils.removeItemsFromInventory(furnace.getInventory(), Material.SUGAR_CANE, consumedFuel);
+
+                if (fuel.getAmount() > consumedFuel) {
+                    fuel.setAmount(fuel.getAmount() - consumedFuel);
+                    furnace.getInventory().setFuel(fuel);
+                } else {
+                    furnace.getInventory().setFuel(new ItemStack(Material.AIR));
+                }
             }
 
             break;

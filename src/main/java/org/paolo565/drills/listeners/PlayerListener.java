@@ -11,6 +11,8 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.paolo565.drills.Config;
+import org.paolo565.drills.Drills;
 
 public class PlayerListener implements Listener {
     @EventHandler
@@ -28,14 +30,16 @@ public class PlayerListener implements Listener {
             return;
         }
 
+        Config config = Drills.getInstance().getConfiguration();
+
         if(clickedInventory.getType() == InventoryType.FURNACE && event.getSlot() == 1
-                && player.getItemOnCursor().getType() == Material.SUGAR_CANE && action == InventoryAction.NOTHING) {
+                && config.isFuel(player.getItemOnCursor().getType()) && action == InventoryAction.NOTHING) {
             event.setCancelled(true);
             ItemStack cursorStack = player.getItemOnCursor();
             player.setItemOnCursor(openInventory.getItem(1));
             openInventory.setItem(1, cursorStack);
         } else if(clickedInventory.getType() == InventoryType.FURNACE && event.getSlot() == 1
-                && player.getItemOnCursor().getType() == Material.SUGAR_CANE && (action == InventoryAction.PLACE_ALL
+                && config.isFuel(player.getItemOnCursor().getType()) && (action == InventoryAction.PLACE_ALL
                 || action == InventoryAction.PICKUP_ALL || action == InventoryAction.PLACE_ONE)) {
             event.setCancelled(true);
             ItemStack furnaceSlot = openInventory.getItem(1);
@@ -43,7 +47,7 @@ public class PlayerListener implements Listener {
 
             if(furnaceSlot == null || furnaceSlot.getType() == Material.AIR) {
                 space = 64;
-            } else if(furnaceSlot.getType() == Material.SUGAR_CANE) {
+            } else if (config.isFuel(furnaceSlot.getType())) {
                 space = 64 - furnaceSlot.getAmount();
             }
 
@@ -56,14 +60,15 @@ public class PlayerListener implements Listener {
                 toPlace = space;
             }
 
-            openInventory.setItem(1, new ItemStack(Material.SUGAR_CANE, furnaceSlot.getAmount() + toPlace));
+            furnaceSlot.setAmount(furnaceSlot.getAmount() + toPlace);
+            openInventory.setItem(1, furnaceSlot);
             if (toPlace == player.getItemOnCursor().getAmount()) {
                 player.setItemOnCursor(new ItemStack(Material.AIR));
             } else {
                 player.getItemOnCursor().setAmount(player.getItemOnCursor().getAmount() - toPlace);
             }
         } else if(clickedInventory.getType() != InventoryType.FURNACE
-                && action == InventoryAction.MOVE_TO_OTHER_INVENTORY && clickedStack.getType() == Material.SUGAR_CANE) {
+                && action == InventoryAction.MOVE_TO_OTHER_INVENTORY && config.isFuel(clickedStack.getType())) {
             ItemStack furnaceSlot = openInventory.getItem(1);
             int count;
 
@@ -78,7 +83,7 @@ public class PlayerListener implements Listener {
 
             int insert = 64 - count;
             insert = clickedStack.getAmount() > insert ? insert : clickedStack.getAmount();
-            furnaceSlot.setType(Material.SUGAR_CANE);
+            furnaceSlot.setType(clickedStack.getType());
             furnaceSlot.setAmount(count + insert);
             openInventory.setItem(1, furnaceSlot);
 
