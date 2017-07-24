@@ -10,6 +10,7 @@ import org.paolo565.drills.listeners.BlockListener;
 import org.paolo565.drills.listeners.PlayerListener;
 
 import java.io.File;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -23,11 +24,14 @@ public class Drills extends JavaPlugin {
         instance = this;
 
         File pluginDirectory = getDataFolder();
-        if(!pluginDirectory.exists()) {
-            pluginDirectory.mkdirs();
-        }
+        pluginDirectory.mkdirs();
 
-        database = new SQLiteDatabase(new File(pluginDirectory + File.separator + "database.db"));
+        database = new SQLiteDatabase(new File(pluginDirectory, "database.db"));
+        try {
+            database.initializeDatabase();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         config = new Config(this);
 
         Server server = getServer();
@@ -38,7 +42,11 @@ public class Drills extends JavaPlugin {
     }
 
     public void onDisable() {
-        database.close();
+        try {
+            database.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Drills getInstance() {
@@ -50,8 +58,14 @@ public class Drills extends JavaPlugin {
     }
 
     public boolean addDrill(Player owner, Location furnace) {
-        try {
-            return database.getConnection().createStatement().executeUpdate("INSERT INTO drills (owner, furnace_world, furnace_x, furnace_y, furnace_z) VALUES ('" + owner.getUniqueId() + "', '" + furnace.getWorld().getName() + "', " + furnace.getBlockX() + ", " + furnace.getBlockY() + ", " + furnace.getBlockZ() + ")") == 1;
+        try (PreparedStatement statement = database.getConnection().prepareStatement("INSERT INTO drills (owner, furnace_world, furnace_x, furnace_y, furnace_z) VALUES (?, ?, ?, ?, ?)")) {
+            statement.setString(1, owner.getUniqueId().toString());
+            statement.setString(2, furnace.getWorld().getName());
+            statement.setInt(3, furnace.getBlockX());
+            statement.setInt(4, furnace.getBlockY());
+            statement.setInt(5, furnace.getBlockZ());
+
+            return statement.executeUpdate() == 1;
         } catch(SQLException ex) {
             ex.printStackTrace();
         }
@@ -60,21 +74,51 @@ public class Drills extends JavaPlugin {
     }
 
     public Player getDrillOwner(Location furnace) {
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
         try {
-            ResultSet resultSet = database.getConnection().createStatement().executeQuery("SELECT owner FROM drills WHERE furnace_world = '" + furnace.getWorld().getName() + "' AND furnace_x = " + furnace.getBlockX() + " AND furnace_y = " + furnace.getBlockY() + " AND furnace_z = " + furnace.getBlockZ());
+            statement = database.getConnection().prepareStatement("SELECT owner FROM drills WHERE furnace_world = ? AND furnace_x = ? AND furnace_y = ? AND furnace_z = ?");
+            statement.setString(1, furnace.getWorld().getName());
+            statement.setInt(2, furnace.getBlockX());
+            statement.setInt(3, furnace.getBlockY());
+            statement.setInt(4, furnace.getBlockZ());
+
+            resultSet = statement.executeQuery();
             if(resultSet.next()) {
                 return Bukkit.getPlayer(UUID.fromString(resultSet.getString("owner")));
             }
         } catch(SQLException ex) {
             ex.printStackTrace();
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return null;
     }
 
     public boolean removeDrill(Location furnace) {
-        try {
-            return database.getConnection().createStatement().executeUpdate("DELETE FROM drills WHERE furnace_world = '" + furnace.getWorld().getName() + "' AND furnace_x = " + furnace.getBlockX() + " AND furnace_y = " + furnace.getBlockY() + " AND furnace_z = " + furnace.getBlockZ()) == 1;
+        try (PreparedStatement statement = database.getConnection().prepareStatement("DELETE FROM drills WHERE furnace_world = ? AND furnace_x = ? AND furnace_y = ? AND furnace_z = ?")) {
+            statement.setString(1, furnace.getWorld().getName());
+            statement.setInt(2, furnace.getBlockX());
+            statement.setInt(3, furnace.getBlockY());
+            statement.setInt(4, furnace.getBlockZ());
+
+            return statement.executeUpdate() == 1;
         } catch(SQLException ex) {
             ex.printStackTrace();
         }

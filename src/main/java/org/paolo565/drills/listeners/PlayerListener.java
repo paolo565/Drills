@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class PlayerListener implements Listener {
     @EventHandler
-    public void onPlayerInventoryEvent(InventoryClickEvent event) {
+    public void onFurnaceInventoryEvent(InventoryClickEvent event) {
         if(!(event.getWhoClicked() instanceof Player)) {
             return;
         }
@@ -47,18 +47,20 @@ public class PlayerListener implements Listener {
                 space = 64 - furnaceSlot.getAmount();
             }
 
-            if(space > 0) {
-                int toPlace = event.getClick() == ClickType.RIGHT ? 1 : player.getItemOnCursor().getAmount();
-                if(space < toPlace) {
-                    toPlace = space;
-                }
+            if (space == 0) {
+                return;
+            }
 
-                openInventory.setItem(1, new ItemStack(Material.SUGAR_CANE, furnaceSlot.getAmount() + toPlace));
-                if(toPlace == player.getItemOnCursor().getAmount()) {
-                    player.setItemOnCursor(new ItemStack(Material.AIR));
-                } else {
-                    player.getItemOnCursor().setAmount(player.getItemOnCursor().getAmount() - toPlace);
-                }
+            int toPlace = event.getClick() == ClickType.RIGHT ? 1 : player.getItemOnCursor().getAmount();
+            if (space < toPlace) {
+                toPlace = space;
+            }
+
+            openInventory.setItem(1, new ItemStack(Material.SUGAR_CANE, furnaceSlot.getAmount() + toPlace));
+            if (toPlace == player.getItemOnCursor().getAmount()) {
+                player.setItemOnCursor(new ItemStack(Material.AIR));
+            } else {
+                player.getItemOnCursor().setAmount(player.getItemOnCursor().getAmount() - toPlace);
             }
         } else if(clickedInventory.getType() != InventoryType.FURNACE
                 && action == InventoryAction.MOVE_TO_OTHER_INVENTORY && clickedStack.getType() == Material.SUGAR_CANE) {
