@@ -17,9 +17,7 @@ fuels:
 
 
 # Drill bits
-# Format: block: modifier
-# Formula used to calculate the amount of fuel used: modifier * broken_blocks
-# Example: sugar cane with diamond block as the bit = 1 * 1 = 1 sugar cane/broken block
+# Format: block: consumed fuel
 bits:
   IRON_BLOCK: 2
   DIAMOND_BLOCK: 1
