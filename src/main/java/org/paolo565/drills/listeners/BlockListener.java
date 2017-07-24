@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.inventory.ItemStack;
 import org.paolo565.drills.Config;
+import org.paolo565.drills.Drill;
 import org.paolo565.drills.Drills;
 import org.paolo565.drills.utils.BlockUtils;
 import org.paolo565.drills.utils.InventoryUtils;
@@ -56,7 +57,7 @@ public class BlockListener implements Listener {
 
         if(broken.getType() == Material.DIAMOND_BLOCK || broken.getType() == Material.IRON_BLOCK) {
             Block furnace = BlockUtils.getFurnaceNearDriller(broken.getLocation());
-            if (furnace == null || plugin.getDrillOwner(furnace.getLocation()) == null) {
+            if (furnace == null || plugin.getDrill(furnace.getLocation()) == null) {
                 return;
             }
 
@@ -73,7 +74,7 @@ public class BlockListener implements Listener {
                 event.setCancelled(true);
                 player.sendMessage(ChatColor.RED + "Error while removing the drill.");
             }
-        } else if(broken.getType() == Material.FURNACE && plugin.getDrillOwner(broken.getLocation()) != null) {
+        } else if (broken.getType() == Material.FURNACE && plugin.getDrill(broken.getLocation()) != null) {
             Block driller = BlockUtils.getDrillerNearFurnace(broken.getLocation());
             if (driller == null) {
                 return;
@@ -131,24 +132,24 @@ public class BlockListener implements Listener {
             return;
         }
 
-        //TODO: Make it work with destoryed > 1
-        int destroyed = config.getBrokenBlocksByFuel(fuel.getType());
         int consumedFuel = config.getDrillBitModifier(driller.getType());
-
         if (fuel.getAmount() < consumedFuel) {
             return;
         }
 
-        Player owner = plugin.getDrillOwner(furnaceBlock.getLocation());
-        if (owner == null) {
+        Drill drill = plugin.getDrill(furnaceBlock.getLocation());
+        if (drill == null || drill.getOwner() == null) {
             return;
         }
+
+        int destructCount = config.getBrokenBlocksByFuel(fuel.getType());
 
         BlockFace face = furnaceBlock.getFace(driller);
         int x_m = face == BlockFace.EAST ? 1 : (face == BlockFace.WEST ? -1 : 0);
         int y_m = face == BlockFace.UP ? 1 : (face == BlockFace.DOWN ? -1 : 0);
         int z_m = face == BlockFace.SOUTH ? 1 : (face == BlockFace.NORTH ? -1 : 0);
 
+        int drilledBlocks = 0;
         Location drillerLocation = driller.getLocation();
         World world = driller.getWorld();
         int x = drillerLocation.getBlockX();
@@ -164,20 +165,25 @@ public class BlockListener implements Listener {
                 return;
             }
 
-            BlockBreakEvent event = new BlockBreakEvent(toBreak, owner);
+            BlockBreakEvent event = new BlockBreakEvent(toBreak, drill.getOwner());
             plugin.getServer().getPluginManager().callEvent(event);
-            if (!event.isCancelled()) {
-                toBreak.breakNaturally();
-
-                if (fuel.getAmount() > consumedFuel) {
-                    fuel.setAmount(fuel.getAmount() - consumedFuel);
-                    furnace.getInventory().setFuel(fuel);
-                } else {
-                    furnace.getInventory().setFuel(new ItemStack(Material.AIR));
-                }
+            if (event.isCancelled()) {
+                return;
             }
 
-            break;
+            toBreak.breakNaturally();
+            drilledBlocks++;
+
+            if (drilledBlocks >= destructCount) {
+                break;
+            }
+        }
+
+        if (fuel.getAmount() > consumedFuel) {
+            fuel.setAmount(fuel.getAmount() - consumedFuel);
+            furnace.getInventory().setFuel(fuel);
+        } else {
+            furnace.getInventory().setFuel(new ItemStack(Material.AIR));
         }
     }
 }

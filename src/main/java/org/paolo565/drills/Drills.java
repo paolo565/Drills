@@ -3,6 +3,7 @@ package org.paolo565.drills;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -73,12 +74,12 @@ public class Drills extends JavaPlugin {
         return false;
     }
 
-    public Player getDrillOwner(Location furnace) {
+    public Drill getDrill(Location furnace) {
         PreparedStatement statement = null;
         ResultSet resultSet = null;
 
         try {
-            statement = database.getConnection().prepareStatement("SELECT owner FROM drills WHERE furnace_world = ? AND furnace_x = ? AND furnace_y = ? AND furnace_z = ?");
+            statement = database.getConnection().prepareStatement("SELECT * FROM drills WHERE furnace_world = ? AND furnace_x = ? AND furnace_y = ? AND furnace_z = ?");
             statement.setString(1, furnace.getWorld().getName());
             statement.setInt(2, furnace.getBlockX());
             statement.setInt(3, furnace.getBlockY());
@@ -86,7 +87,13 @@ public class Drills extends JavaPlugin {
 
             resultSet = statement.executeQuery();
             if(resultSet.next()) {
-                return Bukkit.getPlayer(UUID.fromString(resultSet.getString("owner")));
+                UUID owner = UUID.fromString(resultSet.getString("owner"));
+                World furnaceWorld = Bukkit.getWorld(resultSet.getString("furnace_world"));
+                int furnaceX = resultSet.getInt("furnace_x");
+                int furnaceY = resultSet.getInt("furnace_y");
+                int furnaceZ = resultSet.getInt("furnace_z");
+
+                return new Drill(owner, new Location(furnaceWorld, furnaceX, furnaceY, furnaceZ));
             }
         } catch(SQLException ex) {
             ex.printStackTrace();
