@@ -26,7 +26,9 @@ public class BlockListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onDrillHeadPlaceEvent(BlockPlaceEvent event) {
         Block placed = event.getBlock();
-        if (placed.getType() != Material.IRON_BLOCK && placed.getType() != Material.DIAMOND_BLOCK) {
+        Config config = Drills.getInstance().getConfiguration();
+
+        if (config.isDrillBit(placed.getType())) {
             return;
         }
 
@@ -54,8 +56,9 @@ public class BlockListener implements Listener {
     public void onDrillBreakEvent(BlockBreakEvent event) {
         Player player = event.getPlayer();
         Block broken = event.getBlock();
+        Config config = Drills.getInstance().getConfiguration();
 
-        if(broken.getType() == Material.DIAMOND_BLOCK || broken.getType() == Material.IRON_BLOCK) {
+        if (config.isDrillBit(broken.getType())) {
             Block furnace = BlockUtils.getFurnaceNearDriller(broken.getLocation());
             if (furnace == null || plugin.getDrill(furnace.getLocation()) == null) {
                 return;
