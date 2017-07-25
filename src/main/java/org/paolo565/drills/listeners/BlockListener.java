@@ -131,6 +131,10 @@ public class BlockListener implements Listener {
 
         Furnace furnace = (Furnace) furnaceBlock.getState();
         ItemStack fuel = furnace.getInventory().getFuel();
+        if (fuel == null) {
+            return;
+        }
+
         if (!config.isFuel(fuel.getType())) {
             return;
         }
