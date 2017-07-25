@@ -60,8 +60,7 @@ public class PlayerListener implements Listener {
                 toPlace = space;
             }
 
-            furnaceSlot.setAmount(furnaceSlot.getAmount() + toPlace);
-            openInventory.setItem(1, furnaceSlot);
+            openInventory.setItem(1, new ItemStack(player.getItemOnCursor().getType(), furnaceSlot.getAmount() + toPlace));
             if (toPlace == player.getItemOnCursor().getAmount()) {
                 player.setItemOnCursor(new ItemStack(Material.AIR));
             } else {
