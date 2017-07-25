@@ -43,8 +43,8 @@ public class PlayerListener implements Listener {
                 || action == InventoryAction.PICKUP_ALL || action == InventoryAction.PLACE_ONE)) {
             event.setCancelled(true);
             ItemStack furnaceSlot = openInventory.getItem(1);
-            int space = 0;
 
+            int space = 0;
             if(furnaceSlot == null || furnaceSlot.getType() == Material.AIR) {
                 space = 64;
             } else if (config.isFuel(furnaceSlot.getType())) {
@@ -55,16 +55,17 @@ public class PlayerListener implements Listener {
                 return;
             }
 
-            int toPlace = event.getClick() == ClickType.RIGHT ? 1 : player.getItemOnCursor().getAmount();
+            ItemStack playerItem = player.getItemOnCursor();
+            int toPlace = event.getClick() == ClickType.RIGHT ? 1 : playerItem.getAmount();
             if (space < toPlace) {
                 toPlace = space;
             }
 
-            openInventory.setItem(1, new ItemStack(player.getItemOnCursor().getType(), furnaceSlot.getAmount() + toPlace));
+            openInventory.setItem(1, new ItemStack(playerItem.getType(), furnaceSlot.getAmount() + toPlace));
             if (toPlace == player.getItemOnCursor().getAmount()) {
                 player.setItemOnCursor(new ItemStack(Material.AIR));
             } else {
-                player.getItemOnCursor().setAmount(player.getItemOnCursor().getAmount() - toPlace);
+                player.getItemOnCursor().setAmount(playerItem.getAmount() - toPlace);
             }
         } else if(clickedInventory.getType() != InventoryType.FURNACE
                 && action == InventoryAction.MOVE_TO_OTHER_INVENTORY && config.isFuel(clickedStack.getType())) {
@@ -75,6 +76,10 @@ public class PlayerListener implements Listener {
                 count = 0;
             } else if(furnaceSlot.getType() == Material.SUGAR_CANE) {
                 count = furnaceSlot.getAmount();
+
+                if (clickedStack.getType() != furnaceSlot.getType()) {
+                    return;
+                }
             } else {
                 return;
             }
