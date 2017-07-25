@@ -28,7 +28,7 @@ public class BlockListener implements Listener {
         Block placed = event.getBlock();
         Config config = Drills.getInstance().getConfiguration();
 
-        if (config.isDrillBit(placed.getType())) {
+        if (!config.isDrillBit(placed.getType())) {
             return;
         }
 
