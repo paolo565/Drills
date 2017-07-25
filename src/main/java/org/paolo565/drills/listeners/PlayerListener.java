@@ -74,7 +74,7 @@ public class PlayerListener implements Listener {
 
             if(furnaceSlot == null || furnaceSlot.getType() == Material.AIR) {
                 count = 0;
-            } else if(furnaceSlot.getType() == Material.SUGAR_CANE) {
+            } else if (config.isFuel(furnaceSlot.getType())) {
                 count = furnaceSlot.getAmount();
 
                 if (clickedStack.getType() != furnaceSlot.getType()) {
