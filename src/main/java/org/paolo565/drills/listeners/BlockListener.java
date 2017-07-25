@@ -178,6 +178,7 @@ public class BlockListener implements Listener {
                 return;
             }
 
+            furnace.setBurnTime((short) 10);
             toBreak.breakNaturally();
             drilledBlocks++;
 
